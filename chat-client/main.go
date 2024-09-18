@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -10,7 +11,13 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"os"
+	"time"
 )
+
+type Message struct {
+	Message string    `json:"content"`
+	Time    time.Time `json:"timestamp"`
+}
 
 // RabbitMQ connection and channel setup
 func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
@@ -50,21 +57,29 @@ func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 
 // Function to publish messages to RabbitMQ
 func publishMessage(ch *amqp.Channel, message string) error {
-	err := ch.Publish(
-		"",
+	content := &Message{
+		Message: message,
+		Time:    time.Now(),
+	}
+	bytecontent, err := json.Marshal(content)
+	if err != nil {
+		return err
+	}
+	err = ch.Publish(
+		"my_ex",
 		"post_queue",
 		false,
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(message),
+			Body:        bytecontent,
 		},
 	)
 	return err
 }
 
 // Function to consume messages from RabbitMQ
-func consumeMessages(ch *amqp.Channel, messageChan chan string) {
+func consumeMessages(ch *amqp.Channel, messageChan chan Message) {
 	msgs, err := ch.Consume(
 		"get_queue",
 		"",
@@ -79,7 +94,12 @@ func consumeMessages(ch *amqp.Channel, messageChan chan string) {
 	}
 
 	for msg := range msgs {
-		messageChan <- string(msg.Body)
+		message := &Message{}
+		err := json.Unmarshal(msg.Body, message)
+		if err != nil {
+			log.Fatalf("Failed to unmarshal message: %v", err)
+		}
+		messageChan <- *message
 	}
 }
 
@@ -111,14 +131,14 @@ func main() {
 	})
 
 	// Create a channel to receive messages
-	messageChan := make(chan string)
+	messageChan := make(chan Message)
 	go consumeMessages(ch, messageChan)
 
 	// Update UI with incoming messages
 	go func() {
 		for msg := range messageChan {
 			currentText := messages.Text
-			messages.SetText(currentText + "\n" + msg)
+			messages.SetText(currentText + "\n" + (msg.Message + "  " + msg.Time.Format("2006-01-02 15:04:05")))
 		}
 	}()
 

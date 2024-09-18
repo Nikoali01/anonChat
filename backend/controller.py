@@ -17,10 +17,10 @@ messages_collection = db["messages"]
 app = FastAPI()
 
 # API endpoint to get message count from MongoDB
-@app.get("/messages_count/")
+@app.get("/messages/count")
 async def messages_count():
     try:
         count = messages_collection.count_documents({})
         return {"count": count}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"code": 500, "message": str(e)}

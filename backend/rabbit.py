@@ -38,25 +38,25 @@ recv_channel = connection.channel()
 
 
 # Queue and exchange details
-exchange_name = ''
+exchange_name = 'my_ex'
 queue_name = 'post_queue'
-routing_key = ''
+routing_key = 'post_queue'
 
-forward_exchange_name = ''
+forward_exchange_name = 'my_ex'
 forward_queue_name = 'get_queue'
-forward_routing_key = ''
+forward_routing_key = 'get_queue'
 
 # Declare and bind queues for both incoming and forwarding
-send_channel.exchange_declare(exchange=exchange_name, exchange_type='topic')
-send_channel.queue_declare(queue=queue_name)
+send_channel.exchange_declare(exchange=exchange_name)
+send_channel.queue_declare(queue=queue_name, durable=True)
 send_channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
 
-send_channel.exchange_declare(exchange=forward_exchange_name, exchange_type='topic')
-send_channel.queue_declare(queue=forward_queue_name)
+send_channel.queue_declare(queue=forward_queue_name, durable=True)
 send_channel.queue_bind(exchange=forward_exchange_name, queue=forward_queue_name, routing_key=forward_routing_key)
 
 # Callback function to process messages
 def callback(ch, method, properties, body):
+    print("callback")
     try:
         message = json.loads(body)
         # Insert message into MongoDB

@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  internal_net:
+    external: false
+
 services:
   fastapi-app:
     build:
@@ -14,6 +18,8 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_started
+    networks:
+      - internal_net
 
   rabbit-consumer:
     build:
@@ -26,6 +32,8 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_started
+    networks:
+      - internal_net
 
 
   mongodb:
@@ -34,6 +42,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - internal_net
 
   rabbitmq:
     image: rabbitmq:3.10.7-management
@@ -52,6 +62,8 @@ services:
       - "5672:5672"    # amqp
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
+    networks:
+      - internal_net
 
 volumes:
   mongodb_data:
