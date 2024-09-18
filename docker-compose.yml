@@ -2,14 +2,31 @@ version: '3.8'
 
 services:
   fastapi-app:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.controller
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - mongodb
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+
+  rabbit-consumer:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.rabbit
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+
 
   mongodb:
     image: mongo:latest

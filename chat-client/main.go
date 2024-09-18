@@ -14,7 +14,7 @@ import (
 
 // RabbitMQ connection and channel setup
 func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
-	connString := fmt.Sprintf("amqp://%s:%s@%s:%s:%s", os.Getenv("RABBITMQ_DEFAULT_USER"), os.Getenv("RABBITMQ_DEFAULT_PASS"), os.Getenv("RABBITMQ_HOST"), os.Getenv("RABBITMQ_PORT"))
+	connString := fmt.Sprintf("amqp://%s:%s@%s:%s", os.Getenv("RABBITMQ_DEFAULT_USER"), os.Getenv("RABBITMQ_DEFAULT_PASS"), os.Getenv("RABBITMQ_HOST"), os.Getenv("RABBITMQ_PORT"))
 	conn, err := amqp.Dial(connString)
 	if err != nil {
 		return nil, nil, err
@@ -84,7 +84,7 @@ func consumeMessages(ch *amqp.Channel, messageChan chan string) {
 }
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("./../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
