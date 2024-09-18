@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  fastapi-app:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+      - rabbitmq
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    env_file:
+      - .env
+    ports:
+      - "15672:15672"  # admin-panel
+      - "5672:5672"    # amqp
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+
+volumes:
+  mongodb_data:

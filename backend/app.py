@@ -24,13 +24,14 @@ send_channel = connection.channel()
 
 recv_channel = connection.channel()
 
-exchange_name = 'postMessage'
-queue_name = 'chat_queue/post'
-routing_key = 'chat.message'
+exchange_name = ''
+queue_name = 'post_queue'
+routing_key = ''
 
-forward_exchange_name = 'getMessage'
-forward_queue_name = 'chat_queue/get'
-forward_routing_key = 'forward.message'
+forward_exchange_name = ''
+forward_queue_name = 'get_queue'
+forward_routing_key = ''
+
 
 send_channel.exchange_declare(exchange=exchange_name, exchange_type='topic')
 send_channel.queue_declare(queue=queue_name)
