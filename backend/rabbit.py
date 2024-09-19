@@ -29,7 +29,7 @@ def connect_to_rabbitmq(retries=5, delay=5):
                 raise e
 
 credentials = pika.PlainCredentials('guest', 'guest')
-parameters = pika.ConnectionParameters(host='localhost', port=5672, credentials=credentials)
+parameters = pika.ConnectionParameters(host='rabbitmq', port=5672, credentials=credentials)
 connection = connect_to_rabbitmq()
 send_channel = connection.channel()
 
