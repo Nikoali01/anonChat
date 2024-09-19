@@ -18,9 +18,12 @@ def measure_response_time(url, num_requests=10000, max_allowed_time=0.1):
         response_time = end_time - start_time
         times.append(response_time)
 
-    print("Average time: {sum(times)/len(times)}")
+    print(f"Average time: {sum(times)/len(times)}")
     under_limit = [t for t in times if t <= max_allowed_time]
     percentage_under_limit = (len(under_limit) / num_requests) * 100
 
     print(f"Percentage of responses under {max_allowed_time} seconds: {percentage_under_limit}%")
     return percentage_under_limit
+
+
+measure_response_time(SERVER + "/messages/count")
