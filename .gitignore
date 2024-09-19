@@ -1,2 +1,5 @@
 .env
 /rabbitmq
+.idea
+/chat-client/out
+.DS_Store

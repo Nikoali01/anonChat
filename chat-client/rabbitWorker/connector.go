@@ -1,13 +1,25 @@
 package rabbitWorker
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"github.com/streadway/amqp"
 	"os"
+	"time"
 )
 
 // RabbitMQ connection and channel setup
 func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
+	// Get the current time
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	// Create a SHA256 hash of the current time
+	hash := sha256.New()
+	hash.Write([]byte(now))
+
+	// Convert the hash to a string
+	hashString := fmt.Sprintf("%x", hash.Sum(nil))
+	indQueue = hashString
 	connString := fmt.Sprintf("amqp://%s:%s@%s:%s", os.Getenv("RABBITMQ_DEFAULT_USER"), os.Getenv("RABBITMQ_DEFAULT_PASS"), os.Getenv("RABBITMQ_HOST"), os.Getenv("RABBITMQ_PORT"))
 	conn, err := amqp.Dial(connString)
 	if err != nil {
@@ -30,7 +42,7 @@ func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 	)
 
 	_, err = ch.QueueDeclare(
-		"get_queue",
+		hashString,
 		true,  // durable
 		false, // delete when unused
 		false, // exclusive
@@ -39,7 +51,7 @@ func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 	)
 
 	err = ch.QueueBind(
-		"get_queue",
+		hashString,
 		"",
 		"broadcast",
 		false,

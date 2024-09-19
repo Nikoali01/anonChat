@@ -16,6 +16,7 @@ type Message struct {
 var (
 	conection *amqp.Connection
 	channel   *amqp.Channel
+	indQueue  string
 )
 
 func init() {
@@ -57,7 +58,7 @@ func PublishMessage(message string) error {
 // Function to consume messages from RabbitMQ
 func ConsumeMessages(messageChan chan Message) {
 	msgs, err := channel.Consume(
-		"get_queue",
+		indQueue,
 		"",
 		true,  // auto-ack (set to false to manually acknowledge)
 		false, // exclusive
