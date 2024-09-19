@@ -19,6 +19,16 @@ func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 		return nil, nil, err
 	}
 
+	err = ch.ExchangeDeclare(
+		"broadcast",
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
 	_, err = ch.QueueDeclare(
 		"get_queue",
 		true,  // durable
@@ -27,6 +37,15 @@ func setupRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 		false, // no-wait
 		nil,   // arguments
 	)
+
+	err = ch.QueueBind(
+		"get_queue",
+		"",
+		"broadcast",
+		false,
+		nil,
+	)
+
 	_, err = ch.QueueDeclare(
 		"post_queue",
 		true,  // durable
